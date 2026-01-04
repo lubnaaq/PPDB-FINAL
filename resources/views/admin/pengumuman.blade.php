@@ -136,8 +136,8 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $student->nama_lengkap }}</td>
-                                            <td>{{ $student->user->dokumens->where('nama_dokumen', 'NISN')->first()->catatan_verifikasi ?? '-' }}</td> <!-- Placeholder for NISN value if not in biodata -->
-                                            <td>-</td>
+                                            <td>{{ $student->nisn ?? '-' }}</td>
+                                            <td>{{ $student->asal_sekolah ?? '-' }}</td>
                                         </tr>
                                     @empty
                                         <tr>

@@ -74,7 +74,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Nama Lengkap</th>
-                                        <th>Asal Sekolah</th> <!-- Asumsi ada field ini atau nanti ditambahkan -->
+                                        <th>Asal Sekolah</th>
                                         <th>Kelengkapan Dokumen</th>
                                         <th>Status Seleksi</th>
                                         <th>Aksi</th>
@@ -92,7 +92,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>-</td> <!-- Placeholder jika belum ada data asal sekolah -->
+                                            <td>{{ $biodata->asal_sekolah ?? '-' }}</td>
                                             <td>
                                                 @php
                                                     $totalDocs = $biodata->user->dokumens->count();

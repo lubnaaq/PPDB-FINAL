@@ -24,7 +24,8 @@ class Biodata extends Model
         'kode_pos',
         'nomor_telepon',
         'email',
-        'instansi',
+        'asal_sekolah',
+        'nisn',
         'hobi',
         'keterangan',
     ];

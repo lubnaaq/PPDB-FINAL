@@ -46,7 +46,8 @@ class BiodataController extends Controller
             'provinsi' => 'required|string|max:100',
             'kota' => 'required|string|max:100',
             'kode_pos' => 'nullable|string|max:10',
-            'instansi' => 'nullable|string|max:255',
+            'asal_sekolah' => 'nullable|string|max:255',
+            'nisn' => 'nullable|string|max:20',
             'hobi' => 'nullable|string|max:500',
             'keterangan' => 'nullable|string|max:1000',
         ];

@@ -25,9 +25,9 @@ class AdminLaporanController extends Controller
             ->toArray();
 
         // Statistik Asal Sekolah (Top 5)
-        $asalSekolah = Biodata::select('instansi', DB::raw('count(*) as total'))
-            ->whereNotNull('instansi')
-            ->groupBy('instansi')
+        $asalSekolah = Biodata::select('asal_sekolah', DB::raw('count(*) as total'))
+            ->whereNotNull('asal_sekolah')
+            ->groupBy('asal_sekolah')
             ->orderByDesc('total')
             ->limit(5)
             ->get();

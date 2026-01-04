@@ -137,7 +137,7 @@
                                 <tbody id="asalSekolahBody">
                                     @forelse($asalSekolah as $sekolah)
                                         <tr>
-                                            <td>{{ $sekolah->instansi }}</td>
+                                            <td>{{ $sekolah->asal_sekolah }}</td>
                                             <td class="text-end">{{ $sekolah->total }}</td>
                                         </tr>
                                     @empty
@@ -180,7 +180,7 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $siswa->nama_lengkap }}</td>
                                             <td>{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                                            <td>{{ $siswa->instansi ?? '-' }}</td>
+                                            <td>{{ $siswa->asal_sekolah ?? '-' }}</td>
                                             <td>-</td>
                                             <td><span class="badge bg-success">LULUS</span></td>
                                         </tr>
@@ -272,7 +272,7 @@
                             asalBody.innerHTML = '<tr><td colspan="2" class="text-center">Belum ada data</td></tr>';
                         } else {
                             data.asalSekolah.forEach(s => {
-                                const tr = `<tr><td>${s.instansi || '-'}</td><td class="text-end">${s.total || 0}</td></tr>`;
+                                const tr = `<tr><td>${s.asal_sekolah || '-'}</td><td class="text-end">${s.total || 0}</td></tr>`;
                                 asalBody.insertAdjacentHTML('beforeend', tr);
                             });
                         }
@@ -287,7 +287,7 @@
                         } else {
                             data.siswaLulus.forEach((s, i) => {
                                 const jenis = s.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan';
-                                const tr = `<tr><td>${i+1}</td><td>${s.nama_lengkap}</td><td>${jenis}</td><td>${s.instansi || '-'}</td><td>-</td><td><span class="badge bg-success">LULUS</span></td></tr>`;
+                                const tr = `<tr><td>${i+1}</td><td>${s.nama_lengkap}</td><td>${jenis}</td><td>${s.asal_sekolah || '-'}</td><td>-</td><td><span class="badge bg-success">LULUS</span></td></tr>`;
                                 siswaBody.insertAdjacentHTML('beforeend', tr);
                             });
                         }

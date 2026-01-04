@@ -123,7 +123,7 @@
                                                 <div class="row mb-3">
                                                     <label class="col-md-3 col-form-label fw-bold">Asal Sekolah</label>
                                                     <div class="col-md-9">
-                                                        <p class="form-control-plaintext">{{ $biodata->instansi }}</p>
+                                                        <p class="form-control-plaintext">{{ $biodata->asal_sekolah ?? '-' }}</p>
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">

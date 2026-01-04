@@ -131,7 +131,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
-                                            <label class="form-label">Kode Pos</label>
+                                            <label class="form-label">Kode Pos<span class="text-danger">*</span></label>
                                               <input type="text" class="form-control" name="kode_pos" 
                                                   placeholder="XXXXX" value="{{ old('kode_pos', $biodata->kode_pos ?? '') }}">
                                         </div>
@@ -142,14 +142,21 @@
                                 <h6 class="mb-3 text-primary">Asal Sekolah</h6>
                                 
                                 <div class="row mb-4">
+                                    <div class="col-md-6">
                                         <div class="form-group mb-3">
-                                            <label class="form-label">Nama Sekolah/Instansi</span></label>
-                                              <input type="text" class="form-control" name="instansi" 
-                                                  placeholder="Nama sekolah/instansasai asal" value="{{ old('instansi', $biodata->instansi ?? '') }}">
+                                            <label class="form-label">Nama Sekolah<span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="asal_sekolah" 
+                                                placeholder="Nama sekolah asal" value="{{ old('asal_sekolah', $biodata->asal_sekolah ?? '') }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">NISN<span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="nisn" 
+                                                placeholder="Nomor Induk Siswa Nasional" value="{{ old('nisn', $biodata->nisn ?? '') }}">
                                         </div>
                                     </div>
                                 </div>
-
                                
                                 <!-- Informasi Tambahan -->
                                 <h6 class="mb-3 text-primary">Informasi Tambahan</h6>
