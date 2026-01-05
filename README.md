@@ -50,11 +50,10 @@ php artisan migrate --seed
 
 # Start server
 php artisan serve
-
+```
 Akses aplikasi: http://127.0.0.1:8000
 
-```
-###🛠️ Requirements
+🛠️ Requirements
 - PHP 8.2+
 
 - Composer
@@ -76,7 +75,7 @@ Akses aplikasi: http://127.0.0.1:8000
 │   └── views/
 └── routes/
 ```
-###📊 Status Development
+📊 Status Development
 
 - ✅ SSO Login (Selesai)
 - ✅ Basic Auth
@@ -85,5 +84,6 @@ Akses aplikasi: http://127.0.0.1:8000
 - ⏳ Pengumuman Hasil
 - ⏳ Dashboard Admin
 
-###Author: Lubna Aqila Salsabil
-###Repository: https://github.com/lubnaaq/PPDB-FINAL
+Author: Lubna Aqila Salsabil
+
+Repository: https://github.com/lubnaaq/PPDB-FINAL
