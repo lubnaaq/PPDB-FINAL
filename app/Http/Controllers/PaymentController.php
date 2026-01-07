@@ -26,11 +26,20 @@ class PaymentController extends Controller
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:1000',
             'payment_date' => 'required|date',
+            'payment_method' => 'required|in:lunas,angsuran',
+            'installment_count' => 'nullable|integer|min:2|max:4',
+            'total_amount' => 'required|numeric',
+            'installment_number' => 'nullable|integer',
             'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
+        }
+
+        // Validasi jika angsuran, harus ada installment_count
+        if ($request->payment_method === 'angsuran' && !$request->installment_count) {
+            return back()->with('error', 'Jumlah angsuran harus dipilih untuk metode angsuran.')->withInput();
         }
 
         try {
@@ -42,11 +51,19 @@ class PaymentController extends Controller
                 'user_id' => Auth::id(),
                 'amount' => $request->amount,
                 'payment_date' => $request->payment_date,
+                'payment_method' => $request->payment_method,
                 'proof_file_path' => $filePath,
                 'status' => 'pending',
+                'notes' => $request->payment_method === 'angsuran' 
+                    ? "Angsuran ke-{$request->installment_number} dari {$request->installment_count} (Total: Rp " . number_format($request->total_amount, 0, ',', '.') . ")"
+                    : "Pembayaran Lunas",
             ]);
 
-            return redirect()->route('user.payment.index')->with('success', 'Bukti pembayaran berhasil diunggah dan menunggu verifikasi.');
+            $message = $request->payment_method === 'angsuran' 
+                ? 'Bukti pembayaran angsuran ke-1 berhasil diunggah. Silakan upload angsuran berikutnya sesuai jadwal.'
+                : 'Bukti pembayaran berhasil diunggah dan menunggu verifikasi.';
+
+            return redirect()->route('user.payment.index')->with('success', $message);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengunggah bukti pembayaran: ' . $e->getMessage());
         }

@@ -112,7 +112,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5>Daftar Dokumen Pendaftar</h5>
-                        <p class="text-muted mb-0">Verifikasi dokumen yang diupload oleh pendaftar</p>
+                        <p class="text-muted mb-0">Verifikasi dokumen yang diupload oleh pendaftar (Dikelompokkan per User)</p>
                     </div>
                     <div class="card-body">
                         <!-- Filter Status -->
@@ -128,40 +128,58 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
+                            <table class="table table-hover">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>No.</th>
-                                        <th>Nama Pendaftar</th>
-                                        <th>Nama Dokumen</th>
-                                        <th>Tipe</th>
-                                        <th>Status Dokumen</th>
-                                        <th>Status Pembayaran</th>
-                                        <th>Tanggal Upload</th>
-                                        <th>Aksi</th>
+                                        <th width="5%">No.</th>
+                                        <th width="25%">Nama Pendaftar</th>
+                                        <th width="20%">Email</th>
+                                        <th width="12%">Jumlah Dokumen</th>
+                                        <th width="18%">Status Dokumen</th>
+                                        <th width="12%">Status Pembayaran</th>
+                                        <th width="8%">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($dokumens as $i => $dok)
-                                        <tr>
-                                            <td>{{ ($dokumens->currentPage() - 1) * $dokumens->perPage() + $i + 1 }}</td>
-                                            <td>{{ $dok->user->name ?? '-' }}</td>
-                                            <td>{{ $dok->nama_dokumen }}</td>
-                                            <td><span class="badge bg-secondary">{{ strtoupper($dok->file_type) }}</span></td>
+                                    @php
+                                        // Group dokumen by user_id
+                                        $dokumensByUser = $dokumens->groupBy('user_id');
+                                        $counter = 1;
+                                    @endphp
+                                    
+                                    @forelse ($dokumensByUser as $userId => $userDokumens)
+                                        @php
+                                            $user = $userDokumens->first()->user;
+                                            $totalDocs = $userDokumens->count();
+                                            $pendingDocs = $userDokumens->where('status_verifikasi', 'pending')->count();
+                                            $disetujuiDocs = $userDokumens->where('status_verifikasi', 'disetujui')->count();
+                                            $ditolakDocs = $userDokumens->where('status_verifikasi', 'ditolak')->count();
                                             
+                                            $paymentStatus = $user->payments->sortByDesc('created_at')->first()?->status ?? 'none';
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $counter++ }}</td>
                                             <td>
-                                                @if ($dok->status_verifikasi === 'pending')
-                                                    <span class="badge bg-warning text-dark">Menunggu</span>
-                                                @elseif ($dok->status_verifikasi === 'disetujui')
-                                                    <span class="badge bg-success">Disetujui</span>
-                                                @else
-                                                    <span class="badge bg-danger">Ditolak</span>
-                                                @endif
+                                                <strong>{{ $user->name ?? '-' }}</strong>
+                                            </td>
+                                            <td><small>{{ $user->email ?? '-' }}</small></td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">{{ $totalDocs }} Dokumen</span>
                                             </td>
                                             <td>
-                                                @php
-                                                    $paymentStatus = $dok->user->payments->sortByDesc('created_at')->first()?->status ?? 'none';
-                                                @endphp
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    @if($pendingDocs > 0)
+                                                        <span class="badge bg-warning text-dark">{{ $pendingDocs }} Menunggu</span>
+                                                    @endif
+                                                    @if($disetujuiDocs > 0)
+                                                        <span class="badge bg-success">{{ $disetujuiDocs }} Disetujui</span>
+                                                    @endif
+                                                    @if($ditolakDocs > 0)
+                                                        <span class="badge bg-danger">{{ $ditolakDocs }} Ditolak</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
                                                 @if ($paymentStatus === 'verified')
                                                     <span class="badge bg-success">Lunas</span>
                                                 @elseif ($paymentStatus === 'pending')
@@ -172,24 +190,80 @@
                                                     <span class="badge bg-secondary">Belum Bayar</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $dok->created_at->format('d/m/Y H:i') }}</td>
                                             <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ asset('storage/'.$dok->file_path) }}" target="_blank" class="btn btn-sm btn-info">
-                                                        <i class="feather icon-eye"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-success" onclick="setujui({{ $dok->id }})">
-                                                        <i class="feather icon-check"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="tolak({{ $dok->id }})">
-                                                        <i class="feather icon-x"></i>
-                                                    </button>
+                                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="toggleDetails({{ $userId }})">
+                                                    <i class="feather icon-chevron-down" id="icon-{{ $userId }}"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <!-- Collapsed detail row -->
+                                        <tr id="user-docs-{{ $userId }}" style="display: none;">
+                                            <td colspan="7" class="p-0">
+                                                <div class="bg-light border-top border-bottom">
+                                                    <div class="p-4">
+                                                        <h6 class="mb-3">
+                                                            <i class="feather icon-file-text text-primary"></i> 
+                                                            <strong>Daftar Dokumen {{ $user->name }}</strong>
+                                                        </h6>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-bordered bg-white mb-0">
+                                                                <thead class="table-secondary">
+                                                                    <tr>
+                                                                        <th width="5%">No.</th>
+                                                                        <th width="30%">Nama Dokumen</th>
+                                                                        <th width="10%">Tipe</th>
+                                                                        <th width="12%">Status</th>
+                                                                        <th width="18%">Tanggal Upload</th>
+                                                                        <th width="25%">Aksi</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach ($userDokumens as $index => $dok)
+                                                                        <tr>
+                                                                            <td class="text-center">{{ $index + 1 }}</td>
+                                                                            <td>{{ $dok->nama_dokumen }}</td>
+                                                                            <td class="text-center">
+                                                                                <span class="badge bg-secondary">{{ strtoupper($dok->file_type) }}</span>
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                @if ($dok->status_verifikasi === 'pending')
+                                                                                    <span class="badge bg-warning text-dark">Menunggu</span>
+                                                                                @elseif ($dok->status_verifikasi === 'disetujui')
+                                                                                    <span class="badge bg-success">Disetujui</span>
+                                                                                @else
+                                                                                    <span class="badge bg-danger">Ditolak</span>
+                                                                                @endif
+                                                                            </td>
+                                                                            <td class="text-center">{{ $dok->created_at->format('d/m/Y H:i') }}</td>
+                                                                            <td class="text-center">
+                                                                                <div class="btn-group" role="group">
+                                                                                    <a href="{{ asset('storage/'.$dok->file_path) }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Dokumen">
+                                                                                        <i class="feather icon-eye"></i> Lihat
+                                                                                    </a>
+                                                                                    @if($dok->status_verifikasi !== 'disetujui')
+                                                                                        <button type="button" class="btn btn-sm btn-success" onclick="setujui({{ $dok->id }})" title="Setujui">
+                                                                                            <i class="feather icon-check"></i> Setujui
+                                                                                        </button>
+                                                                                    @endif
+                                                                                    @if($dok->status_verifikasi !== 'ditolak')
+                                                                                        <button type="button" class="btn btn-sm btn-danger" onclick="tolak({{ $dok->id }})" title="Tolak">
+                                                                                            <i class="feather icon-x"></i> Tolak
+                                                                                        </button>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted py-5">
+                                            <td colspan="7" class="text-center text-muted py-5">
                                                 <i class="feather icon-info"></i> Belum ada data dokumen.
                                             </td>
                                         </tr>
@@ -255,6 +329,19 @@
     </div>
 
     <script>
+        function toggleDetails(userId) {
+            const detailRow = document.getElementById('user-docs-' + userId);
+            const icon = document.getElementById('icon-' + userId);
+            
+            if (detailRow.style.display === 'none') {
+                detailRow.style.display = 'table-row';
+                icon.className = 'feather icon-chevron-up';
+            } else {
+                detailRow.style.display = 'none';
+                icon.className = 'feather icon-chevron-down';
+            }
+        }
+
         function updateStatus(id, status, catatan = null) {
             fetch(`/dokumen/${id}/status`, {
                 method: 'PUT',

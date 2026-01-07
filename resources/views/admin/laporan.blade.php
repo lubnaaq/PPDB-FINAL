@@ -11,8 +11,311 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
+
+        /* Print Styles */
+        @media print {
+            /* Hide non-printable elements */
+            body {
+                background: white !important;
+                background-image: none !important;
+            }
+
+            .breadcrumb,
+            .page-header,
+            .btn,
+            .card-header button,
+            .col-xl-3,
+            .col-md-8,
+            .col-md-4,
+            .col-md-6,
+            #registrationChart,
+            #genderChart,
+            .feather,
+            nav,
+            .pc-sidebar,
+            .pc-header,
+            .pc-footer {
+                display: none !important;
+            }
+
+            .pc-content {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+                page-break-inside: avoid;
+            }
+
+            .card-header {
+                display: none !important;
+            }
+
+            .card-body {
+                padding: 0 !important;
+            }
+
+            /* Show print header */
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 3px solid #000;
+            }
+
+            .print-header .logo {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 15px;
+            }
+
+            .print-header h2 {
+                margin: 5px 0;
+                font-size: 18pt;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .print-header h3 {
+                margin: 5px 0;
+                font-size: 16pt;
+                font-weight: bold;
+            }
+
+            .print-header p {
+                margin: 2px 0;
+                font-size: 11pt;
+            }
+
+            /* Document info */
+            .print-info {
+                display: block !important;
+                margin: 20px 0 30px 0;
+            }
+
+            .print-info table {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .print-info td {
+                padding: 5px;
+                font-size: 11pt;
+            }
+
+            /* Table styling for print */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+                page-break-inside: auto;
+            }
+
+            table thead {
+                background-color: #f0f0f0 !important;
+            }
+
+            table th,
+            table td {
+                border: 1px solid #333 !important;
+                padding: 8px !important;
+                font-size: 10pt !important;
+                text-align: left;
+            }
+
+            table th {
+                background-color: #e0e0e0 !important;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .badge {
+                border: 1px solid #333 !important;
+                padding: 2px 6px !important;
+                background-color: #f5f5f5 !important;
+                color: #000 !important;
+            }
+
+            /* Signature section */
+            .print-signature {
+                display: block !important;
+                margin-top: 50px;
+                page-break-inside: avoid;
+            }
+
+            .print-signature-wrapper {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .signature-box {
+                width: 45%;
+                text-align: center;
+            }
+
+            .signature-box p {
+                margin: 5px 0;
+            }
+
+            .signature-space {
+                height: 80px;
+                margin: 10px 0;
+            }
+
+            .signature-name {
+                font-weight: bold;
+                text-decoration: underline;
+            }
+
+            /* Print footer */
+            .print-footer {
+                display: block !important;
+                text-align: center;
+                margin-top: 30px;
+                font-size: 9pt;
+                color: #666;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+            }
+
+            /* Page settings */
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+
+            /* Summary stats for print */
+            .print-summary {
+                display: block !important;
+                margin: 20px 0;
+                padding: 15px;
+                border: 2px solid #000;
+                background-color: #f9f9f9;
+            }
+
+            .print-summary h4 {
+                margin: 0 0 10px 0;
+                font-size: 12pt;
+                font-weight: bold;
+            }
+
+            .print-summary-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .print-summary-item {
+                padding: 8px;
+                border: 1px solid #666;
+                text-align: center;
+            }
+
+            .print-summary-item strong {
+                display: block;
+                font-size: 16pt;
+                margin-bottom: 5px;
+            }
+
+            .print-summary-item span {
+                font-size: 9pt;
+            }
+        }
+
+        /* Hide print elements on screen */
+        .print-header,
+        .print-info,
+        .print-signature,
+        .print-footer,
+        .print-summary {
+            display: none;
+        }
     </style>
     <div class="pc-content">
+        <!-- Print Header (Only visible when printing) -->
+        <div class="print-header">
+            <table style="width: 100%; border: none;">
+                <tr style="border: none;">
+                    <td style="width: 80px; border: none; vertical-align: top;">
+                        <!-- Logo placeholder - Ganti dengan logo sekolah Anda -->
+                        <div style="width: 80px; height: 80px; border: 2px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;">
+                            LOGO
+                        </div>
+                    </td>
+                    <td style="border: none; text-align: center; padding-left: 20px;">
+                        <h2 style="margin: 0; font-size: 18pt; font-weight: bold;">SMK ANTARTIKA 1 SIDOARJO</h2>
+                        <h3 style="margin: 5px 0; font-size: 14pt; font-weight: bold;">SISTEM PENERIMAAN PESERTA DIDIK BARU</h3>
+                        <p style="margin: 2px 0; font-size: 8pt;">Jl. Siwalan Panji, Bedrek, Siwalanpanji, Kec. Sidoarjo, Kab. Sidoarjo, Jawa Timur 61252</p>
+                        <p style="margin: 2px 0; font-size: 8pt;">Telp:  (031) 8962851 | Email: info@smkantartika.sch.id | Website: www.smkantartika.sch.id</p>
+                    </td>
+                    <td style="width: 80px; border: none;"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Print Info (Only visible when printing) -->
+        <div class="print-info">
+            <h3 style="text-align: center; margin: 20px 0; font-size: 14pt; font-weight: bold; text-decoration: underline;">
+                LAPORAN PENERIMAAN PESERTA DIDIK BARU
+            </h3>
+            <h4 style="text-align: center; margin: 10px 0 20px 0; font-size: 12pt;">
+                TAHUN AJARAN 2026/2027
+            </h4>
+            
+            <table style="border: none; width: auto; margin-bottom: 20px;">
+                <tr style="border: none;">
+                    <td style="width: 150px; border: none; padding: 3px 0;">Tanggal Cetak</td>
+                    <td style="width: 20px; border: none; padding: 3px 0;">:</td>
+                    <td style="border: none; padding: 3px 0;">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</td>
+                </tr>
+                <tr style="border: none;">
+                    <td style="border: none; padding: 3px 0;">Waktu Cetak</td>
+                    <td style="border: none; padding: 3px 0;">:</td>
+                    <td style="border: none; padding: 3px 0;">{{ \Carbon\Carbon::now()->format('H:i') }} WIB</td>
+                </tr>
+                <tr style="border: none;">
+                    <td style="border: none; padding: 3px 0;">Dicetak Oleh</td>
+                    <td style="border: none; padding: 3px 0;">:</td>
+                    <td style="border: none; padding: 3px 0;">{{ Auth::user()->name }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Print Summary Stats (Only visible when printing) -->
+        <div class="print-summary">
+            <h4>RINGKASAN DATA PENDAFTARAN</h4>
+            <div class="print-summary-grid">
+                <div class="print-summary-item">
+                    <strong>{{ $totalPendaftar }}</strong>
+                    <span>Total Pendaftar</span>
+                </div>
+                <div class="print-summary-item">
+                    <strong>{{ $sudahIsiBiodata }}</strong>
+                    <span>Sudah Isi Biodata</span>
+                </div>
+                <div class="print-summary-item">
+                    <strong>{{ $sudahUploadDokumen }}</strong>
+                    <span>Sudah Upload Dokumen</span>
+                </div>
+                <div class="print-summary-item">
+                    <strong>{{ $lulusSeleksi }}</strong>
+                    <span>Lulus Seleksi</span>
+                </div>
+                <div class="print-summary-item">
+                    <strong>{{ $sudahBayar }}</strong>
+                    <span>Sudah Bayar</span>
+                </div>
+                <div class="print-summary-item">
+                    <strong>{{ $pembayaranPending }}</strong>
+                    <span>Pembayaran Pending</span>
+                </div>
+            </div>
+        </div>
+
         <!-- [ breadcrumb ] start -->
         <div class="page-header">
             <div class="page-block">
@@ -275,6 +578,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Print Signature Section (Only visible when printing) -->
+        <div class="print-signature">
+            <p style="margin: 20px 0 10px 0; text-align: justify; font-size: 10pt;">
+                Demikian laporan ini dibuat dengan sebenarnya berdasarkan data yang telah terverifikasi dalam Sistem Penerimaan Peserta Didik Baru (PPDB) Tahun Ajaran 2026/2027.
+            </p>
+            
+            <table style="width: 100%; border: none; margin-top: 40px;">
+                <tr style="border: none;">
+                    <td style="width: 50%; border: none; text-align: center; vertical-align: top;">
+                        <p style="margin: 0;">Mengetahui,</p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;">Ketua Panitia PPDB</p>
+                        <div style="height: 80px;"></div>
+                        <p style="margin: 0; font-weight: bold; text-decoration: underline;">_______________________</p>
+                        <p style="margin: 5px 0 0 0; font-size: 10pt;">NIP. ___________________</p>
+                    </td>
+                    <td style="width: 50%; border: none; text-align: center; vertical-align: top;">
+                        <p style="margin: 0;">Bandung, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;">Kepala Sekolah</p>
+                        <div style="height: 80px;"></div>
+                        <p style="margin: 0; font-weight: bold; text-decoration: underline;">_______________________</p>
+                        <p style="margin: 5px 0 0 0; font-size: 10pt;">NIP. ___________________</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Print Footer (Only visible when printing) -->
+        <div class="print-footer">
+            <p style="margin: 0;">Dokumen ini dicetak secara otomatis dari Sistem PPDB SMK Negeri Unggulan</p>
+            <p style="margin: 5px 0 0 0;">Halaman ini merupakan dokumen resmi dan sah tanpa memerlukan tanda tangan basah</p>
+        </div>
+
         <!-- [ Main Content ] end -->
     </div>
 

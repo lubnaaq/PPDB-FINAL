@@ -138,11 +138,71 @@
                             @csrf
                             
                             <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Total Biaya Pendaftaran <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="text" class="form-control" id="totalBiaya" readonly>
+                                        </div>
+                                        <small class="form-text text-muted d-block mt-2">
+                                            <i class="feather icon-info"></i> Total biaya berdasarkan jurusan dan gelombang yang dipilih
+                                        </small>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label class="form-label">Jumlah Pembayaran (Rp) <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control @error('amount') is-invalid @enderror" 
-                                               name="amount" id="amount" value="{{ old('amount') }}" required min="1000">
+                                        <label class="form-label">Metode Pembayaran <span class="text-danger">*</span></label>
+                                        <select class="form-control @error('payment_method') is-invalid @enderror" 
+                                                name="payment_method" id="payment_method" required>
+                                            <option value="">-- Pilih Metode --</option>
+                                            <option value="lunas">Lunas (Bayar Penuh)</option>
+                                            <option value="angsuran">Angsuran (Cicilan)</option>
+                                        </select>
+                                        @error('payment_method')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="angsuranOptions" style="display: none;">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Jumlah Angsuran <span class="text-danger">*</span></label>
+                                        <select class="form-control @error('installment_count') is-invalid @enderror" 
+                                                name="installment_count" id="installment_count">
+                                            <option value="">-- Pilih Angsuran --</option>
+                                            <option value="2">2 Bulan</option>
+                                            <option value="3">3 Bulan</option>
+                                            <option value="4">4 Bulan</option>
+                                        </select>
+                                        @error('installment_count')
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Ringkasan Angsuran -->
+                                <div class="col-md-12" id="installmentSummary" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <h6 class="alert-heading"><i class="feather icon-calendar"></i> Rincian Angsuran</h6>
+                                        <div id="installmentDetails"></div>
+                                        <p class="mb-0 mt-2"><strong>Pembayaran pertama (saat ini):</strong> <span id="firstInstallment">Rp 0</span></p>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Jumlah Pembayaran Saat Ini (Rp) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="number" class="form-control @error('amount') is-invalid @enderror" 
+                                                   name="amount" id="amount" value="{{ old('amount') }}" required min="1000" readonly>
+                                            <span class="input-group-text" id="amountFormatted">0</span>
+                                        </div>
+                                        <small class="form-text text-muted d-block mt-2">
+                                            <i class="feather icon-info"></i> Jumlah yang harus dibayar saat ini
+                                        </small>
                                         @error('amount')
                                             <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
@@ -153,12 +213,16 @@
                                     <div class="form-group mb-3">
                                         <label class="form-label">Tanggal Pembayaran <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control @error('payment_date') is-invalid @enderror" 
-                                               name="payment_date" id="payment_date" value="{{ old('payment_date') }}" required>
+                                               name="payment_date" id="payment_date" value="{{ old('payment_date', \Carbon\Carbon::today()->format('Y-m-d')) }}" required>
                                         @error('payment_date')
                                             <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
+
+                                <!-- Hidden fields untuk angsuran -->
+                                <input type="hidden" name="total_amount" id="total_amount" value="0">
+                                <input type="hidden" name="installment_number" id="installment_number" value="1">
 
                                 <div class="col-md-12">
                                     <div class="form-group mb-3">
@@ -207,8 +271,10 @@
                                     <thead>
                                         <tr>
                                             <th>No.</th>
+                                            <th>Metode</th>
                                             <th>Jumlah</th>
                                             <th>Tanggal</th>
+                                            <th>Keterangan</th>
                                             <th>Bukti</th>
                                             <th>Status</th>
                                             <th>Tanggal Upload</th>
@@ -219,8 +285,18 @@
                                         @foreach ($payments as $key => $payment)
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
+                                                <td>
+                                                    @if($payment->payment_method === 'angsuran')
+                                                        <span class="badge bg-info">Angsuran</span>
+                                                    @else
+                                                        <span class="badge bg-success">Lunas</span>
+                                                    @endif
+                                                </td>
                                                 <td>Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+                                                <td>
+                                                    <small>{{ $payment->notes ?? '-' }}</small>
+                                                </td>
                                                 <td>
                                                     <a href="{{ asset('storage/'.$payment->proof_file_path) }}" target="_blank" class="btn btn-sm btn-info">Lihat</a>
                                                 </td>
@@ -263,6 +339,12 @@
             });
         }
 
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('id-ID').format(value);
+        }
+
+        let totalPrice = 0;
+
         document.addEventListener('DOMContentLoaded', function() {
             const jurusan = @json($jurusan ?? null);
             
@@ -287,15 +369,34 @@
                     gelombang = 'Gelombang 2 (Mulai 1 Juni 2026)';
                 }
 
+                totalPrice = price;
+
                 // Update UI Elements
+                const totalBiaya = document.getElementById('totalBiaya');
                 const amountInput = document.getElementById('amount');
+                const amountFormatted = document.getElementById('amountFormatted');
                 const gelombangText = document.getElementById('gelombangText');
                 const biayaText = document.getElementById('biayaText');
+                const totalAmountInput = document.getElementById('total_amount');
 
+                // Set total biaya
+                if (totalBiaya) {
+                    totalBiaya.value = formatCurrency(price);
+                }
+
+                // Set nilai default (lunas)
                 if (amountInput) {
                     amountInput.value = price;
-                    // Opsional: set readonly jika ingin memaksa user membayar sesuai harga
-                    // amountInput.readOnly = true; 
+                    amountInput.readOnly = true;
+                }
+
+                if (totalAmountInput) {
+                    totalAmountInput.value = price;
+                }
+
+                // Update tampilan format currency
+                if (amountFormatted) {
+                    amountFormatted.textContent = formatCurrency(price);
                 }
 
                 if (gelombangText) {
@@ -303,9 +404,97 @@
                 }
 
                 if (biayaText) {
-                    biayaText.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(price);
+                    biayaText.textContent = 'Rp ' + formatCurrency(price);
                 }
             }
+
+            // Handle metode pembayaran change
+            const paymentMethodSelect = document.getElementById('payment_method');
+            const angsuranOptions = document.getElementById('angsuranOptions');
+            const installmentCountSelect = document.getElementById('installment_count');
+            const installmentSummary = document.getElementById('installmentSummary');
+
+            if (paymentMethodSelect) {
+                paymentMethodSelect.addEventListener('change', function() {
+                    const method = this.value;
+                    const amountInput = document.getElementById('amount');
+                    const amountFormatted = document.getElementById('amountFormatted');
+
+                    if (method === 'angsuran') {
+                        angsuranOptions.style.display = 'block';
+                        installmentCountSelect.required = true;
+                    } else if (method === 'lunas') {
+                        angsuranOptions.style.display = 'none';
+                        installmentSummary.style.display = 'none';
+                        installmentCountSelect.required = false;
+                        installmentCountSelect.value = '';
+                        
+                        // Set kembali ke harga penuh
+                        if (amountInput) {
+                            amountInput.value = totalPrice;
+                        }
+                        if (amountFormatted) {
+                            amountFormatted.textContent = formatCurrency(totalPrice);
+                        }
+                    } else {
+                        angsuranOptions.style.display = 'none';
+                        installmentSummary.style.display = 'none';
+                        installmentCountSelect.required = false;
+                    }
+                });
+            }
+
+            // Handle installment count change
+            if (installmentCountSelect) {
+                installmentCountSelect.addEventListener('change', function() {
+                    const count = parseInt(this.value);
+                    
+                    if (count > 0 && totalPrice > 0) {
+                        calculateInstallments(count, totalPrice);
+                        installmentSummary.style.display = 'block';
+                    } else {
+                        installmentSummary.style.display = 'none';
+                    }
+                });
+            }
         });
+
+        function calculateInstallments(count, total) {
+            const amountInput = document.getElementById('amount');
+            const amountFormatted = document.getElementById('amountFormatted');
+            const installmentDetails = document.getElementById('installmentDetails');
+            const firstInstallment = document.getElementById('firstInstallment');
+
+            // Hitung angsuran per bulan
+            const perMonth = Math.ceil(total / count);
+            
+            // Hitung sisa untuk pembayaran terakhir (jika ada selisih karena pembulatan)
+            const lastPayment = total - (perMonth * (count - 1));
+
+            // Set nilai untuk pembayaran pertama
+            if (amountInput) {
+                amountInput.value = perMonth;
+            }
+            if (amountFormatted) {
+                amountFormatted.textContent = formatCurrency(perMonth);
+            }
+            if (firstInstallment) {
+                firstInstallment.textContent = 'Rp ' + formatCurrency(perMonth);
+            }
+
+            // Buat detail angsuran
+            let detailsHTML = '<ul class="mb-0">';
+            for (let i = 1; i <= count; i++) {
+                const amount = (i === count) ? lastPayment : perMonth;
+                const status = (i === 1) ? ' <span class="badge bg-warning">Bayar Sekarang</span>' : '';
+                detailsHTML += `<li>Angsuran ke-${i}: Rp ${formatCurrency(amount)}${status}</li>`;
+            }
+            detailsHTML += '</ul>';
+            detailsHTML += `<hr><p class="mb-0"><strong>Total:</strong> Rp ${formatCurrency(total)}</p>`;
+
+            if (installmentDetails) {
+                installmentDetails.innerHTML = detailsHTML;
+            }
+        }
     </script>
 @endsection

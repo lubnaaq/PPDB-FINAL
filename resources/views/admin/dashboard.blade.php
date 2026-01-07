@@ -1,3 +1,6 @@
+@extends('layouts.dashboard')
+@section('title', 'Dashboard Admin')
+@section('content')
 <style>
     /* BACKGROUND HALAMAN */
     body {
@@ -82,6 +85,99 @@
         }
     }
 
+    /* Update indicator */
+    .update-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #4CAF50;
+        margin-left: 8px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .card-update-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #4CAF50;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+        display: none;
+        z-index: 10;
+    }
+
+    .stat-card.updated .card-update-badge {
+        display: block;
+        animation: slideInUpdate 0.5s ease;
+    }
+
+    @keyframes slideInUpdate {
+        from {
+            transform: translateX(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .stat-card.updated {
+        box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+    }
+
+    /* Real-time status */
+    .realtime-status {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        z-index: 100;
+    }
+
+    .realtime-status.online {
+        background: #f0f9ff;
+        border-left: 4px solid #4680ff;
+    }
+
+    .realtime-status.offline {
+        background: #fef2f2;
+        border-left: 4px solid #dc3545;
+    }
+
+    .realtime-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4CAF50;
+        animation: pulse 1s infinite;
+    }
+
+    .realtime-dot.offline {
+        background: #dc3545;
+        animation: none;
+    }
+
     .card {
         border: 1px solid rgba(255,255,255,.1);
     }
@@ -90,6 +186,7 @@
         background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
         border-bottom: 2px solid rgba(102, 126, 234, 0.2);
         padding: 1.5rem;
+        position: relative;
     }
 
     .card-header h5 {
@@ -102,15 +199,32 @@
     .apexcharts-legend {
         justify-content: center;
     }
+
+    /* Last update info */
+    .last-update {
+        position: absolute;
+        bottom: 5px;
+        right: 10px;
+        font-size: 9px;
+        color: rgba(255,255,255,.6);
+    }
 </style>
 
-<div class="dashboard-wrapper">
+<div class="pc-content">
+    <div class="dashboard-wrapper">
+
+    <!-- Real-time Status Indicator -->
+    <div class="realtime-status online" id="realtimeStatus">
+        <div class="realtime-dot" id="realtimeDot"></div>
+        <span id="realtimeText">Live Update: Aktif</span>
+    </div>
 
     <div class="row g-4">
 
         <!-- Statistik Utama dengan Gradient -->
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-soft stat-card" style="--grad-start: #4680ff; --grad-end: #2e5ce6;">
+            <div class="card shadow-soft stat-card" id="cardTotalPendaftar" style="--grad-start: #4680ff; --grad-end: #2e5ce6;">
+                <div class="card-update-badge">UPDATED</div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
@@ -124,7 +238,8 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-soft stat-card" style="--grad-start: #28a745; --grad-end: #1e7e34;">
+            <div class="card shadow-soft stat-card" id="cardSudahIsiBiodata" style="--grad-start: #28a745; --grad-end: #1e7e34;">
+                <div class="card-update-badge">UPDATED</div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
@@ -138,7 +253,8 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-soft stat-card" style="--grad-start: #ffc107; --grad-end: #ff9800;">
+            <div class="card shadow-soft stat-card" id="cardSudahUploadDokumen" style="--grad-start: #ffc107; --grad-end: #ff9800;">
+                <div class="card-update-badge">UPDATED</div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
@@ -152,7 +268,8 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-soft stat-card" style="--grad-start: #17a2b8; --grad-end: #138496;">
+            <div class="card shadow-soft stat-card" id="cardLulusSeleksi" style="--grad-start: #17a2b8; --grad-end: #138496;">
+                <div class="card-update-badge">UPDATED</div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
@@ -220,22 +337,38 @@
 <!-- ApexCharts -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
+    // Global chart variables
+    var dashRegistrationChart = null;
+    var dashGenderChart = null;
+    var dashStatusVerifikasiChart = null;
+    var dashStatusSeleksiChart = null;
+    let updateInterval = null;
+    
     document.addEventListener('DOMContentLoaded', function() {
         const DATA_URL = "{{ route('admin.laporan.data') }}";
-
-        // Initialize empty charts
-        var dashRegistrationChart = null;
-        var dashGenderChart = null;
-        var dashStatusVerifikasiChart = null;
-        var dashStatusSeleksiChart = null;
+        console.log('Dashboard initialized with DATA_URL:', DATA_URL);
+        
+        // Store previous values for change detection
+        let previousValues = {
+            totalPendaftar: 0,
+            sudahIsiBiodata: 0,
+            sudahUploadDokumen: 0,
+            lulusSeleksi: 0
+        };
 
         async function initAndUpdateCharts() {
+            console.log('Fetching dashboard data...');
             try {
                 const res = await fetch(DATA_URL);
-                if (!res.ok) return;
+                if (!res.ok) {
+                    updateRealtimeStatus(false);
+                    return;
+                }
+                updateRealtimeStatus(true);
+                
                 const data = await res.json();
 
-                // Update stat cards dengan animasi
+                // Update stat cards dengan animasi dan change detection
                 const statElements = {
                     'dashTotalPendaftar': data.totalPendaftar ?? 0,
                     'dashSudahIsiBiodata': data.sudahIsiBiodata ?? 0,
@@ -245,8 +378,19 @@
 
                 for (const [id, value] of Object.entries(statElements)) {
                     const elem = document.getElementById(id);
-                    if (elem && elem.textContent !== value.toString()) {
-                        animateValue(elem, parseInt(elem.textContent) || 0, value, 800);
+                    const cardId = 'card' + id.replace('dash', '');
+                    const card = document.getElementById(cardId);
+                    
+                    if (elem) {
+                        const oldValue = parseInt(elem.textContent) || 0;
+                        if (oldValue !== value) {
+                            animateValue(elem, oldValue, value, 600);
+                            // Show update badge
+                            if (card) {
+                                card.classList.add('updated');
+                                setTimeout(() => card.classList.remove('updated'), 3000);
+                            }
+                        }
                     }
                 }
 
@@ -394,6 +538,26 @@
 
             } catch (err) {
                 console.error('Error fetching dashboard data', err);
+                updateRealtimeStatus(false);
+            }
+        }
+
+        // Update real-time status indicator
+        function updateRealtimeStatus(isOnline) {
+            const status = document.getElementById('realtimeStatus');
+            const dot = document.getElementById('realtimeDot');
+            const text = document.getElementById('realtimeText');
+            
+            if (isOnline) {
+                status.classList.remove('offline');
+                status.classList.add('online');
+                dot.classList.remove('offline');
+                text.textContent = '🟢 Live Update: Aktif';
+            } else {
+                status.classList.remove('online');
+                status.classList.add('offline');
+                dot.classList.add('offline');
+                text.textContent = '🔴 Live Update: Offline';
             }
         }
 
@@ -415,7 +579,18 @@
         // Initial load
         initAndUpdateCharts();
 
-        // Poll every 30 seconds
-        setInterval(initAndUpdateCharts, 30000);
+        // Poll every 10 seconds untuk update lebih cepat
+        updateInterval = setInterval(initAndUpdateCharts, 10000);
+
+        // Optional: Stop polling when page is hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(updateInterval);
+            } else {
+                initAndUpdateCharts();
+                updateInterval = setInterval(initAndUpdateCharts, 10000);
+            }
+        });
     });
 </script>
+@endsection
